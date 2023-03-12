@@ -21,12 +21,16 @@ namespace AnimatedCircles_Ideal_Gas_
         public bool Pause
         {
             get => pause;
-            set => pause = value;
+            set
+            {
+                pause = value;
+                PauseMethod();
+            }
         }
-
-        public bool PauseMethod()
+        public event EventHandler PauseChanged;
+        protected virtual void PauseMethod()
         {
-            return Pause;
+            PauseChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public delegate bool Paused();
@@ -85,26 +89,15 @@ namespace AnimatedCircles_Ideal_Gas_
                     
                     while (isAlive)
                     {
-                        if (pause)
+                        animators.RemoveAll(it => !it.IsAlive);
+                        lock (locker)
                         {
-                            foreach (var animator in animators)
+                            if (PaintOnBuffer())
                             {
-                                animator.Pause = true;
+                                bg.Render(MainGraphics);
                             }
                         }
-                        else
-                        {
-                            var paused = new Paused(PauseMethod);
-                            animators.RemoveAll(it => !it.IsAlive);
-                            lock (locker)
-                            {
-                                if (PaintOnBuffer())
-                                {
-                                    bg.Render(MainGraphics);
-                                }
-                            }
-                            if (isAlive) Thread.Sleep(30);
-                        }
+                        if (isAlive) Thread.Sleep(30);
                     }
                 }
                 catch (ThreadInterruptedException e)
