@@ -78,13 +78,13 @@ namespace AnimatedCircles_Ideal_Gas_
             {
                 while (!isClicked)
                 {
-                    Reflect();
-                    Thread.Sleep(30);
-                    Move();
-                    while (pause)
+                    while (pause && !isClicked)
                     {
                         Thread.Sleep(1);
                     }
+                    Reflect();
+                    Thread.Sleep(30);
+                    Move();
                 }
             });
             t.IsBackground = true;

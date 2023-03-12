@@ -33,8 +33,6 @@ namespace AnimatedCircles_Ideal_Gas_
             PauseChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        public delegate bool Paused();
-
         private volatile int objectsPainted = 0;
         public Thread PainterThread => t;
         public Graphics MainGraphics
@@ -74,6 +72,7 @@ namespace AnimatedCircles_Ideal_Gas_
         public void AddNew()
         {
             var a = new AnimatedCircle(ContainerSize);
+            a.Pause = pause == true ? true : false;
             animators.Add(a);
             a.Start();
             //Thread.Sleep(500);
@@ -86,7 +85,14 @@ namespace AnimatedCircles_Ideal_Gas_
             {
                 try
                 {
-                    
+                    //
+                    PauseChanged += (sender, e) =>
+                    {
+                        foreach(var animator in animators)
+                        {
+                            animator.Pause = animator.Pause == true ? false : true;
+                        }
+                    };
                     while (isAlive)
                     {
                         animators.RemoveAll(it => !it.IsAlive);
@@ -138,6 +144,7 @@ namespace AnimatedCircles_Ideal_Gas_
             var rand = new Random();
             int radius = rand.Next(20, 50);
             var a = new AnimatedCircle(point.X-radius, point.Y-radius,radius, ContainerSize);
+            a.Pause = pause == true ? true : false;
             animators.Add(a);
             a.Start();
         }
